@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ThinkFiller AI - Test Form Page</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --card-dark: #1e293b;
+      --border-dark: #334155;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --accent: #3b82f6;
+      --accent-glow: rgba(59, 130, 246, 0.15);
+      --success: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      gap: 30px;
+    }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+      background: var(--card-dark);
+      border: 1px solid var(--border-dark);
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .side-panel {
+      max-width: 400px;
+      width: 100%;
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 16px;
+      padding: 24px;
+      position: sticky;
+      top: 40px;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: var(--text-sub);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-sub);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    label.required::after {
+      content: ' *';
+      color: #ef4444;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      background-color: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-dark);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+      background-color: rgba(15, 23, 42, 0.8);
+    }
+
+    textarea {
+      height: 80px;
+      resize: vertical;
+    }
+
+    /* Custom Checkboxes / Radios */
+    .checkbox-group, .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .checkbox-label, .radio-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--text-main);
+      text-transform: none;
+      cursor: pointer;
+      font-weight: 400;
+    }
+
+    input[type="checkbox"], input[type="radio"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    /* Buttons */
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      margin-top: 10px;
+    }
+
+    .btn-submit:hover {
+      opacity: 0.9;
+    }
+
+    /* Live state watcher */
+    .watcher-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .live-badge {
+      font-size: 10px;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .state-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12px;
+      color: #cbd5e1;
+    }
+
+    .state-item {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px dashed rgba(255,255,255,0.05);
+      padding-bottom: 4px;
+    }
+
+    .state-key {
+      color: var(--text-sub);
+    }
+
+    .state-val {
+      color: #38bdf8;
+      max-width: 220px;
+      word-wrap: break-word;
+      text-align: right;
+    }
+
+    .state-val.boolean-true {
+      color: var(--success);
+    }
+
+    .state-val.empty {
+      color: #ef4444;
+      font-style: italic;
+    }
+
+    /* Alert payloads container */
+    .payload-alert-box {
+      margin-top: 20px;
+      padding: 12px;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: 8px;
+      font-size: 13px;
+      display: none;
+    }
+
+    .payload-alert-box.visible {
+      display: block;
+    }
+
+    @media (max-width: 900px) {
+      body {
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+      }
+      .side-panel {
+        position: relative;
+        top: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Form Container -->
+  <div class="container">
+    <h1>Test Form (QA Sandbox)</h1>
+    <p class="subtitle">Use this page to verify that the ThinkFiller AI extension scans, values, and events fire correctly (as in React/Vue/Angular forms).</p>
+    
+    <form id="qaTestForm" onsubmit="event.preventDefault(); alert('Form submitted! Open Developer Tools to see details.'); console.log('Submitted Data:', getFormState());">
+      <!-- Row 1 -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fullName" class="required">Full Name</label>
+          <input type="text" id="fullName" name="full_name" placeholder="John Doe" required />
+        </div>
+        <div class="form-group">
+          <label for="email" class="required">Email Address</label>
+          <input type="email" id="email" name="email" placeholder="john@example.com" required />
+        </div>
+      </div>
+
+      <!-- Row 2 -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="age">Age</label>
+          <input type="number" id="age" name="age" min="1" max="120" placeholder="25" />
+        </div>
+        <div class="form-group">
+          <label for="dob">Date of Birth</label>
+          <input type="date" id="dob" name="dob" />
+        </div>
+      </div>
+
+      <!-- Row 3 -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="password" class="required">Password</label>
+          <input type="password" id="password" name="password" placeholder="••••••••" required />
+        </div>
+        <div class="form-group">
+          <label for="country">Country</label>
+          <select id="country" name="country">
+            <option value="">-- Choose Country --</option>
+            <option value="US">United States (US)</option>
+            <option value="ID">Indonesia (ID)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Dependent Fields Row -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="province">Province / State</label>
+          <select id="province" name="province" disabled>
+            <option value="">-- Select Country First --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="city">City</label>
+          <select id="city" name="city" disabled>
+            <option value="">-- Select Province First --</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Textarea -->
+      <div class="form-group">
+        <label for="comments">Comments / Bio</label>
+        <textarea id="comments" name="comments" placeholder="Describe your experience..."></textarea>
+      </div>
+
+      <!-- Radios -->
+      <div class="form-group">
+        <label>Gender</label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="gender" value="male" /> Male
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="gender" value="female" /> Female
+          </label>
+        </div>
+      </div>
+
+      <!-- Checkboxes -->
+      <div class="form-group">
+        <label>Interests</label>
+        <div class="checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" name="interests" value="coding" /> Software Development
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" name="interests" value="design" /> UI/UX Design
+          </label>
+        </div>
+      </div>
+
+      <!-- Required Checkbox -->
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" id="terms" name="terms" required /> I agree to the terms and conditions
+        </label>
+      </div>
+
+      <button type="submit" class="btn-submit">Submit Form</button>
+    </form>
+  </div>
+
+  <!-- Framework State Emulation Watcher (Side Panel) -->
+  <div class="side-panel">
+    <div class="watcher-title">
+      <span>React/Vue State Watcher</span>
+      <span class="live-badge">Live Updates</span>
+    </div>
+    <p class="subtitle">This panel displays the local state. React and Vue forms depend on input events. If the state updates automatically when AI fills the form, event dispatching is functioning properly!</p>
+    
+    <div class="state-list" id="stateList">
+      <!-- Populated via JS -->
+    </div>
+
+    <!-- Exploits Warnings -->
+    <div class="payload-alert-box" id="payloadAlertBox">
+      <strong>⚠️ Exploit Payloads Detected!</strong>
+      <div style="font-size: 11px; margin-top: 6px; font-family: monospace; color: #f87171;" id="payloadContent"></div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('qaTestForm');
+    const stateList = document.getElementById('stateList');
+    const alertBox = document.getElementById('payloadAlertBox');
+    const alertContent = document.getElementById('payloadContent');
+
+    // Extract values dynamically
+    function getFormState() {
+      const formData = new FormData(form);
+      const state = {};
+
+      // Initialize all keys
+      state['full_name'] = document.getElementById('fullName').value;
+      state['email'] = document.getElementById('email').value;
+      state['age'] = document.getElementById('age').value;
+      state['dob'] = document.getElementById('dob').value;
+      state['password'] = document.getElementById('password').value;
+      state['country'] = document.getElementById('country').value;
+      state['province'] = document.getElementById('province').value;
+      state['city'] = document.getElementById('city').value;
+      state['comments'] = document.getElementById('comments').value;
+      
+      // Radios
+      const gender = document.querySelector('input[name="gender"]:checked');
+      state['gender'] = gender ? gender.value : '';
+
+      // Checkboxes
+      const interests = [];
+      document.querySelectorAll('input[name="interests"]:checked').forEach(cb => {
+        interests.push(cb.value);
+      });
+      state['interests'] = interests.join(', ');
+
+      // Terms
+      state['terms'] = document.getElementById('terms').checked;
+
+      return state;
+    }
+
+    // Render state list
+    function renderState() {
+      const state = getFormState();
+      stateList.innerHTML = '';
+      
+      let containsPayloads = false;
+      let payloadsFound = [];
+
+      for (const [key, val] of Object.entries(state)) {
+        const item = document.createElement('div');
+        item.className = 'state-item';
+
+        const keySpan = document.createElement('span');
+        keySpan.className = 'state-key';
+        keySpan.textContent = key;
+
+        const valSpan = document.createElement('span');
+        valSpan.className = 'state-val';
+
+        if (typeof val === 'boolean') {
+          valSpan.textContent = val ? 'TRUE' : 'FALSE';
+          if (val) valSpan.classList.add('boolean-true');
+        } else if (val === '') {
+          valSpan.textContent = '(empty)';
+          valSpan.classList.add('empty');
+        } else {
+          valSpan.textContent = val;
+        }
+
+        // Detect SQLi or XSS payloads for the UI feedback
+        if (typeof val === 'string' && (val.includes('<script>') || val.includes('OR ') || val.includes('onerror') || val.includes('SELECT') || val.includes('../'))) {
+          containsPayloads = true;
+          payloadsFound.push(`${key}: ${val}`);
+        }
+
+        item.appendChild(keySpan);
+        item.appendChild(valSpan);
+        stateList.appendChild(item);
+      }
+
+      if (containsPayloads) {
+        alertBox.classList.add('visible');
+        alertContent.innerHTML = payloadsFound.map(p => escapeHtml(p)).join('<br>');
+      } else {
+        alertBox.classList.remove('visible');
+      }
+    }
+
+    function escapeHtml(unsafe) {
+      return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // Cascading dropdown data
+    const locationData = {
+      ID: {
+        provinces: {
+          "DKI Jakarta": ["Jakarta Pusat", "Jakarta Selatan", "Jakarta Barat"],
+          "Jawa Barat": ["Bandung", "Bogor", "Depok"],
+          "Bali": ["Denpasar", "Badung", "Ubud"]
+        }
+      },
+      US: {
+        provinces: {
+          "California": ["Los Angeles", "San Francisco", "San Diego"],
+          "New York": ["New York City", "Buffalo", "Rochester"],
+          "Texas": ["Houston", "Austin", "Dallas"]
+        }
+      }
+    };
+
+    const countrySelect = document.getElementById('country');
+    const provinceSelect = document.getElementById('province');
+    const citySelect = document.getElementById('city');
+
+    // Country change handler
+    countrySelect.addEventListener('change', () => {
+      const country = countrySelect.value;
+      provinceSelect.innerHTML = '<option value="">-- Choose Province --</option>';
+      citySelect.innerHTML = '<option value="">-- Select Province First --</option>';
+      citySelect.disabled = true;
+
+      if (country && locationData[country]) {
+        provinceSelect.disabled = false;
+        Object.keys(locationData[country].provinces).forEach(prov => {
+          const opt = document.createElement('option');
+          opt.value = prov;
+          opt.textContent = prov;
+          provinceSelect.appendChild(opt);
+        });
+      } else {
+        provinceSelect.disabled = true;
+        provinceSelect.innerHTML = '<option value="">-- Select Country First --</option>';
+      }
+      renderState();
+    });
+
+    // Province change handler
+    provinceSelect.addEventListener('change', () => {
+      const country = countrySelect.value;
+      const province = provinceSelect.value;
+      citySelect.innerHTML = '<option value="">-- Choose City --</option>';
+
+      if (country && province && locationData[country] && locationData[country].provinces[province]) {
+        citySelect.disabled = false;
+        locationData[country].provinces[province].forEach(city => {
+          const opt = document.createElement('option');
+          opt.value = city;
+          opt.textContent = city;
+          citySelect.appendChild(opt);
+        });
+      } else {
+        citySelect.disabled = true;
+        citySelect.innerHTML = '<option value="">-- Select Province First --</option>';
+      }
+      renderState();
+    });
+
+    citySelect.addEventListener('change', renderState);
+
+    // Attach listeners to all inputs to mimic framework updates (two-way binding simulation)
+    function attachInputListeners() {
+      const inputs = form.querySelectorAll('input, select, textarea');
+      inputs.forEach(input => {
+        input.removeEventListener('input', renderState);
+        input.removeEventListener('change', renderState);
+        input.addEventListener('input', renderState);
+        input.addEventListener('change', renderState);
+      });
+    }
+
+    // Initial attachment
+    attachInputListeners();
+
+    // Mutation observer to dynamically rebind listeners when select options change (since options redraw)
+    const observer = new MutationObserver(attachInputListeners);
+    observer.observe(form, { childList: true, subtree: true });
+
+    // Initial render
+    renderState();
+  </script>
+</body>
+</html>

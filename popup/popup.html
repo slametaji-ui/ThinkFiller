@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ThinkFiller AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <div class="logo-glow"></div>
+        <span class="logo-icon">⚡</span>
+        <h1>ThinkFiller <span class="accent-text">AI</span></h1>
+      </div>
+      <div class="header-right">
+        <button id="themeToggleBtn" class="theme-toggle-btn" title="Toggle Theme">🌙</button>
+        <div class="status-badge" id="statusBadge">
+          <span class="status-dot green"></span>
+          <span class="status-text" id="detectedCount">Scanning...</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="app-main">
+      <!-- Profile Selector -->
+      <section class="section-card">
+        <h2 class="section-title">Testing Profile</h2>
+        <div class="profile-grid">
+          <button class="profile-btn active" data-profile="positive">
+            <span class="profile-icon">🟢</span>
+            <span class="profile-name">Positive</span>
+          </button>
+          <button class="profile-btn" data-profile="negative">
+            <span class="profile-icon">🔴</span>
+            <span class="profile-name">Negative</span>
+          </button>
+          <button class="profile-btn" data-profile="custom">
+            <span class="profile-icon">🎨</span>
+            <span class="profile-name">Custom</span>
+          </button>
+        </div>
+
+        <!-- Custom Prompt Input (Hidden by default) -->
+        <div class="custom-prompt-container" id="customPromptContainer">
+          <label for="customPrompt">Instructions for AI:</label>
+          <textarea id="customPrompt" placeholder="e.g. Fill form as a customer from Indonesia with a credit card payment error..."></textarea>
+        </div>
+      </section>
+
+      <!-- Collapsible API Configuration Settings -->
+      <section class="section-card collapsible">
+        <button class="collapse-toggle" id="toggleSettingsBtn">
+          <span class="toggle-title">🔧 API Settings</span>
+          <span class="toggle-chevron">▼</span>
+        </button>
+        <div class="collapsible-content" id="settingsContent">
+          <div class="form-group">
+            <label for="apiKey">Gemini API Key:</label>
+            <div class="input-with-button">
+              <input type="password" id="apiKey" placeholder="Enter AI Studio API Key" />
+              <button type="button" id="togglePasswordBtn" class="icon-btn" title="Toggle visibility">👁</button>
+            </div>
+            <p class="help-text">Get a free key from <a href="https://aistudio.google.com/" target="_blank">Google AI Studio</a>.</p>
+          </div>
+          
+          <div class="form-group">
+            <label for="modelSelect">AI Model:</label>
+            <select id="modelSelect">
+              <option value="gemini-2.5-flash">Gemini 2.5 Flash (Fast, Free)</option>
+              <option value="gemini-2.5-pro">Gemini 2.5 Pro (Powerful)</option>
+              <option value="gemini-1.5-flash">Gemini 1.5 Flash (Legacy)</option>
+            </select>
+          </div>
+          <button id="saveSettingsBtn" class="btn btn-secondary">Save Settings</button>
+        </div>
+      </section>
+
+      <!-- Main Action Button -->
+      <div class="action-container">
+        <button id="fillFormBtn" class="btn btn-primary btn-glow">
+          <span class="btn-text">Generate & Fill Form</span>
+          <div class="loader-spinner hidden" id="btnSpinner"></div>
+        </button>
+      </div>
+
+      <!-- Logs / Outputs Console -->
+      <section class="section-card log-card">
+        <h2 class="section-title">Execution Console</h2>
+        <div class="console-box" id="consoleBox">
+          <div class="console-line system-msg">Console ready. Select a profile and hit fill.</div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <span>ThinkFiller AI v1.0.0 • QA Web Testing Companion</span>
+    </footer>
+  </div>
+
+  <!-- Include Scripts -->
+  <script src="../utils/gemini-api.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

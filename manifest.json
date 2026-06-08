@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "ThinkFiller AI",
+  "version": "1.0.0",
+  "description": "Smart form filler browser extension powered by free Gemini AI to make QA web testing faster and context-aware.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "popup/popup.html"
+  },
+  "background": {
+    "service_worker": "scripts/background.js"
+  },
+  "commands": {
+    "fill-last-profile": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y"
+      },
+      "description": "Intelligently fill active form using last selected profile"
+    }
+  }
+}
