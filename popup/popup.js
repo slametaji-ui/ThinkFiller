@@ -152,11 +152,59 @@ document.addEventListener('DOMContentLoaded', async () => {
           label.className = 'preview-label';
           label.innerText = f.label || f.name || f.thinkFillerId;
           
-          const input = document.createElement('input');
-          input.type = 'text';
-          input.className = 'preview-input';
-          input.value = val;
-          input.setAttribute('data-id', f.thinkFillerId);
+          let input;
+          if (f.type === 'select' || f.type === 'select-multiple') {
+            input = document.createElement('select');
+            input.className = 'preview-input';
+            input.setAttribute('data-id', f.thinkFillerId);
+            if (f.type === 'select-multiple') {
+              input.multiple = true;
+            }
+            
+            if (f.options && f.options.length > 0) {
+              f.options.forEach(opt => {
+                const optionEl = document.createElement('option');
+                optionEl.value = opt.value;
+                optionEl.textContent = opt.text;
+                
+                // Determine if this option is selected
+                if (f.type === 'select-multiple') {
+                  const vals = Array.isArray(val) ? val : String(val).split(',').map(s => s.trim());
+                  const isSelected = vals.some(v => {
+                    const vLower = String(v).toLowerCase();
+                    const optValLower = String(opt.value).toLowerCase();
+                    const optTextLower = String(opt.text).toLowerCase();
+                    return optValLower === vLower || optTextLower === vLower ||
+                           (vLower && (optTextLower.includes(vLower) || vLower.includes(optTextLower) || optValLower.includes(vLower) || vLower.includes(optValLower)));
+                  });
+                  if (isSelected) {
+                    optionEl.selected = true;
+                  }
+                } else {
+                  const valLower = String(val).toLowerCase();
+                  const optValLower = String(opt.value).toLowerCase();
+                  const optTextLower = String(opt.text).toLowerCase();
+                  if (optValLower === valLower || optTextLower === valLower ||
+                      (valLower && (optTextLower.includes(valLower) || valLower.includes(optTextLower) || optValLower.includes(valLower) || valLower.includes(optValLower)))) {
+                    optionEl.selected = true;
+                  }
+                }
+                input.appendChild(optionEl);
+              });
+            } else {
+              const optionEl = document.createElement('option');
+              optionEl.value = val;
+              optionEl.textContent = val;
+              optionEl.selected = true;
+              input.appendChild(optionEl);
+            }
+          } else {
+            input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'preview-input';
+            input.value = val;
+            input.setAttribute('data-id', f.thinkFillerId);
+          }
           
           item.appendChild(label);
           item.appendChild(input);
@@ -185,16 +233,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       const finalData = {};
       previewList.querySelectorAll('.preview-input').forEach(input => {
         const id = input.getAttribute('data-id');
-        let val = input.value;
-        if (val === 'true') val = true;
-        if (val === 'false') val = false;
+        let val;
+        if (input.tagName.toLowerCase() === 'select' && input.multiple) {
+          val = Array.from(input.selectedOptions).map(opt => opt.value);
+        } else {
+          val = input.value;
+          if (val === 'true') val = true;
+          if (val === 'false') val = false;
+        }
         finalData[id] = val;
       });
 
       logMessage('Injecting data into page...', 'info');
       const fillResponse = await chrome.tabs.sendMessage(activeTabId, {
         action: 'fillForm',
-        data: finalData
+        data: finalData,
+        fields: scrapedFields
       });
 
       if (fillResponse && fillResponse.success) {
@@ -220,9 +274,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       const finalData = {};
       previewList.querySelectorAll('.preview-input').forEach(input => {
         const id = input.getAttribute('data-id');
-        let val = input.value;
-        if (val === 'true') val = true;
-        if (val === 'false') val = false;
+        let val;
+        if (input.tagName.toLowerCase() === 'select' && input.multiple) {
+          val = Array.from(input.selectedOptions).map(opt => opt.value);
+        } else {
+          val = input.value;
+          if (val === 'true') val = true;
+          if (val === 'false') val = false;
+        }
         finalData[id] = val;
       });
 
