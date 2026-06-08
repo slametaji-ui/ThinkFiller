@@ -572,6 +572,66 @@ select:focus {
   color: var(--warning);
 }
 
+/* Preview Card */
+.preview-card {
+  animation: slideDown 0.3s ease-out forwards;
+}
+
+.preview-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+  padding-right: 4px;
+}
+
+.preview-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--card-border);
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+
+[data-theme="light"] .preview-item {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.preview-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.preview-input {
+  background: var(--input-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: var(--text-primary);
+  font-size: 13px;
+  width: 100%;
+  transition: all 0.2s;
+}
+
+.preview-input:focus {
+  outline: none;
+  border-color: var(--secondary-accent);
+  box-shadow: 0 0 6px rgba(6, 182, 212, 0.3);
+}
+
+.preview-actions {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 8px;
+}
+
 /* Footer */
 .app-footer {
   text-align: center;

@@ -85,10 +85,26 @@
       <!-- Main Action Button -->
       <div class="action-container">
         <button id="fillFormBtn" class="btn btn-primary btn-glow">
-          <span class="btn-text">Generate & Fill Form</span>
+          <span class="btn-text">Generate Mock Data</span>
           <div class="loader-spinner hidden" id="btnSpinner"></div>
         </button>
       </div>
+
+      <!-- Preview Generated Data Section (Hidden by default) -->
+      <section class="section-card preview-card hidden" id="previewContainer">
+        <h2 class="section-title">Preview Generated Data</h2>
+        <div class="preview-list" id="previewList">
+          <!-- Populated dynamically -->
+        </div>
+        <div class="preview-actions">
+          <button id="injectDataBtn" class="btn btn-primary btn-glow">
+            <span class="btn-text">⚡ Fill Form Now</span>
+          </button>
+          <button id="regenerateDataBtn" class="btn btn-secondary">
+            <span>🔄 Regenerate</span>
+          </button>
+        </div>
+      </section>
 
       <!-- Logs / Outputs Console -->
       <section class="section-card log-card">

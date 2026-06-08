@@ -21,6 +21,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnSpinner = document.getElementById('btnSpinner');
   const consoleBox = document.getElementById('consoleBox');
   const themeToggleBtn = document.getElementById('themeToggleBtn');
+  const previewContainer = document.getElementById('previewContainer');
+  const previewList = document.getElementById('previewList');
+  const injectDataBtn = document.getElementById('injectDataBtn');
+  const regenerateDataBtn = document.getElementById('regenerateDataBtn');
 
   // State variables
   let activeTabId = null;
@@ -92,12 +96,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // 6. Action Button Click (Main Flow)
-  fillFormBtn.addEventListener('click', async () => {
-    // Disable button to prevent double-click
+  // 6. Action Button Click (Main Flow - Generation only)
+  fillFormBtn.addEventListener('click', generateAndShowPreview);
+  regenerateDataBtn.addEventListener('click', generateAndShowPreview);
+
+  async function generateAndShowPreview() {
     setLoadingState(true);
     clearLogs();
-    logMessage('Starting Smart Form Fill process...', 'info');
+    previewContainer.classList.add('hidden');
+    logMessage('Generating mock data with Gemini AI...', 'info');
 
     try {
       // Load current settings
@@ -130,12 +137,63 @@ document.addEventListener('DOMContentLoaded', async () => {
         activeTabTitle
       );
 
-      logMessage('Received structured test data from AI. Injecting values...', 'ai');
+      logMessage('Received mock data from Gemini AI. Rendered preview below.', 'success');
 
-      // Send generated data to content script to fill fields
+      // Populate preview list
+      previewList.innerHTML = '';
+      scrapedFields.forEach(f => {
+        const val = generatedData[f.thinkFillerId];
+        if (val !== undefined) {
+          const item = document.createElement('div');
+          item.className = 'preview-item';
+          
+          const label = document.createElement('div');
+          label.className = 'preview-label';
+          label.innerText = f.label || f.name || f.thinkFillerId;
+          
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.className = 'preview-input';
+          input.value = val;
+          input.setAttribute('data-id', f.thinkFillerId);
+          
+          item.appendChild(label);
+          item.appendChild(input);
+          previewList.appendChild(item);
+        }
+      });
+
+      // Show preview card
+      previewContainer.classList.remove('hidden');
+
+    } catch (error) {
+      logMessage(error.message, 'error');
+    } finally {
+      setLoadingState(false);
+    }
+  }
+
+  // 7. Inject Data Button Click (Fill form elements)
+  injectDataBtn.addEventListener('click', async () => {
+    injectDataBtn.disabled = true;
+    const btnText = injectDataBtn.querySelector('.btn-text');
+    const oldText = btnText.textContent;
+    btnText.textContent = 'Filling form...';
+    
+    try {
+      const finalData = {};
+      previewList.querySelectorAll('.preview-input').forEach(input => {
+        const id = input.getAttribute('data-id');
+        let val = input.value;
+        if (val === 'true') val = true;
+        if (val === 'false') val = false;
+        finalData[id] = val;
+      });
+
+      logMessage('Injecting data into page...', 'info');
       const fillResponse = await chrome.tabs.sendMessage(activeTabId, {
         action: 'fillForm',
-        data: generatedData
+        data: finalData
       });
 
       if (fillResponse && fillResponse.success) {
@@ -145,13 +203,13 @@ document.addEventListener('DOMContentLoaded', async () => {
           errors.forEach(err => logMessage(`Warning: ${err}`, 'warn'));
         }
       } else {
-        throw new Error('Failed to fill form fields. Injection rejected.');
+        throw new Error(fillResponse?.error || 'Failed to fill form fields.');
       }
-
     } catch (error) {
       logMessage(error.message, 'error');
     } finally {
-      setLoadingState(false);
+      injectDataBtn.disabled = false;
+      btnText.textContent = oldText;
     }
   });
 
@@ -321,7 +379,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
       fillFormBtn.disabled = false;
       btnSpinner.classList.add('hidden');
-      fillFormBtn.querySelector('.btn-text').textContent = 'Generate & Fill Form';
+      fillFormBtn.querySelector('.btn-text').textContent = 'Generate Mock Data';
     }
   }
 
