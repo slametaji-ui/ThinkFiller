@@ -30,7 +30,24 @@
    */
   function scrapeActiveForm() {
     const selector = 'input:not([type="hidden"]):not([type="submit"]):not([type="reset"]):not([type="button"]):not([type="image"]):not([type="file"]), textarea, select';
-    const elements = document.querySelectorAll(selector);
+    let elements = Array.from(document.querySelectorAll(selector));
+
+    // Sort elements visually: top-to-bottom, then left-to-right
+    elements.sort((a, b) => {
+      const rectA = a.getBoundingClientRect();
+      const rectB = b.getBoundingClientRect();
+      const topA = rectA.top + window.scrollY;
+      const topB = rectB.top + window.scrollY;
+      const leftA = rectA.left + window.scrollX;
+      const leftB = rectB.left + window.scrollX;
+
+      // If elements are on the same vertical line (within 15px), sort left-to-right
+      if (Math.abs(topA - topB) < 15) {
+        return leftA - leftB;
+      }
+      return topA - topB;
+    });
+
     const fields = [];
     const radioGroups = {};
     let idCounter = 1;
@@ -224,7 +241,47 @@
     const filled = [];
     const errors = [];
 
-    for (const [thinkFillerId, value] of Object.entries(data)) {
+    // Query all inputs in visual order to fill them sequentially
+    const selector = 'input:not([type="hidden"]):not([type="submit"]):not([type="reset"]):not([type="button"]):not([type="image"]):not([type="file"]), textarea, select';
+    let elements = Array.from(document.querySelectorAll(selector));
+    
+    // Sort elements visually: top-to-bottom, then left-to-right
+    elements.sort((a, b) => {
+      const rectA = a.getBoundingClientRect();
+      const rectB = b.getBoundingClientRect();
+      const topA = rectA.top + window.scrollY;
+      const topB = rectB.top + window.scrollY;
+      const leftA = rectA.left + window.scrollX;
+      const leftB = rectB.left + window.scrollX;
+      
+      if (Math.abs(topA - topB) < 15) {
+        return leftA - leftB;
+      }
+      return topA - topB;
+    });
+
+    for (const element of elements) {
+      if (element.readOnly) continue;
+      
+      const rect = element.getBoundingClientRect();
+      const isVisible = rect.width > 0 && rect.height > 0 && window.getComputedStyle(element).display !== 'none';
+      if (!isVisible) continue;
+
+      // Check if this element belongs to a radio group
+      const radioGroupId = element.getAttribute('data-thinkfiller-radio-group-id');
+      const thinkFillerId = radioGroupId || element.getAttribute('data-thinkfiller-id');
+      
+      if (!thinkFillerId || !(thinkFillerId in data)) {
+        continue;
+      }
+
+      const value = data[thinkFillerId];
+
+      // Prevent filling a radio group multiple times
+      if (filled.includes(thinkFillerId)) {
+        continue;
+      }
+
       if (thinkFillerId.startsWith('tf_radio_group_')) {
         // Handle grouped radio buttons
         const radios = document.querySelectorAll(`input[type="radio"][data-thinkfiller-radio-group-id="${thinkFillerId}"]`);
@@ -251,7 +308,6 @@
           });
 
           if (!matched) {
-            // As a fallback check the first option if the value represents an option index or name
             if (typeof value === 'boolean' || value === 'true') {
               if (radios[0] && !radios[0].checked) {
                 radios[0].checked = true;
@@ -263,8 +319,8 @@
 
           if (matched) {
             filled.push(thinkFillerId);
-            // Brief pause as radios might trigger dependent updates
-            await new Promise(resolve => setTimeout(resolve, 250));
+            // Wait brief moment for events to register in frameworks
+            await new Promise(resolve => setTimeout(resolve, 100));
           } else {
             errors.push(`Could not match radio option "${value}" for group: ${thinkFillerId}`);
           }
@@ -273,16 +329,9 @@
         }
       } else {
         // Standard elements
-        const element = document.querySelector(`[data-thinkfiller-id="${thinkFillerId}"]`);
-        if (!element) {
-          errors.push(`Element not found: ${thinkFillerId}`);
-          continue;
-        }
-
         try {
           const tagName = element.tagName.toLowerCase();
-          const type = element.type;
-
+          
           // If it is a select dropdown, check if it's disabled or empty, and wait/poll up to 2 seconds for it to update
           if (tagName === 'select') {
             const targetValStr = String(value).trim().toLowerCase();
@@ -309,13 +358,8 @@
           setElementValue(element, value);
           filled.push(thinkFillerId);
 
-          // If this is a select, pause for 2 seconds (2000ms) to allow dependent fields to render.
-          // For other interactive inputs (checkbox, radio), wait 250ms.
-          if (tagName === 'select') {
-            await new Promise(resolve => setTimeout(resolve, 2000));
-          } else if (type === 'checkbox' || type === 'radio') {
-            await new Promise(resolve => setTimeout(resolve, 250));
-          }
+          // Wait brief moment (100ms) for framework binding/updating before processing next element
+          await new Promise(resolve => setTimeout(resolve, 100));
         } catch (err) {
           errors.push(`Error filling ${thinkFillerId}: ${err.message}`);
         }
