@@ -319,8 +319,8 @@
 
           if (matched) {
             filled.push(thinkFillerId);
-            // Wait brief moment for events to register in frameworks
-            await new Promise(resolve => setTimeout(resolve, 100));
+            // Wait brief moment for events to register in frameworks (500ms typing/framework delay)
+            await new Promise(resolve => setTimeout(resolve, 500));
           } else {
             errors.push(`Could not match radio option "${value}" for group: ${thinkFillerId}`);
           }
@@ -358,8 +358,8 @@
           setElementValue(element, value);
           filled.push(thinkFillerId);
 
-          // Wait brief moment (100ms) for framework binding/updating before processing next element
-          await new Promise(resolve => setTimeout(resolve, 100));
+          // Wait brief moment (500ms) for framework binding/updating before processing next element
+          await new Promise(resolve => setTimeout(resolve, 500));
         } catch (err) {
           errors.push(`Error filling ${thinkFillerId}: ${err.message}`);
         }
