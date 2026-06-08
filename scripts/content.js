@@ -397,6 +397,7 @@
           );
           opt.selected = isMatch;
         }
+        triggerEvents(element, ['change', 'blur']);
       } else {
         // Standard single select
         let matched = false;
@@ -414,6 +415,7 @@
           const optText = opt.text.trim().toLowerCase();
           
           if (optVal === valStr || optText === valStr) {
+            element.selectedIndex = i;
             opt.selected = true;
             element.value = opt.value;
             matched = true;
@@ -429,6 +431,7 @@
             const optText = opt.text.trim().toLowerCase();
             
             if (optText.includes(valStr) || valStr.includes(optText) || optVal.includes(valStr) || valStr.includes(optVal)) {
+              element.selectedIndex = i;
               opt.selected = true;
               element.value = opt.value;
               matched = true;
@@ -440,25 +443,29 @@
         // 3. Smart Fallback: if no match found, select the first valid option to prevent breaking dependencies
         if (!matched && element.options.length > 0) {
           let fallbackOpt = null;
+          let fallbackIndex = -1;
           for (let i = 0; i < element.options.length; i++) {
             if (element.options[i].value !== '') {
               fallbackOpt = element.options[i];
+              fallbackIndex = i;
               break;
             }
           }
           if (!fallbackOpt && element.options[0]) {
             fallbackOpt = element.options[0];
+            fallbackIndex = 0;
           }
 
           if (fallbackOpt) {
+            element.selectedIndex = fallbackIndex;
             fallbackOpt.selected = true;
             element.value = fallbackOpt.value;
             matched = true;
             console.warn(`ThinkFiller AI: No match for "${value}" in select, fell back to "${fallbackOpt.text}"`);
           }
         }
+        triggerEvents(element, ['change', 'blur']);
       }
-      triggerEvents(element, ['change', 'input', 'blur']);
     } else if (type === 'checkbox') {
       // Checkboxes
       const shouldBeChecked = value === true || value === 'true' || value === 1 || value === '1' || String(value).toLowerCase() === 'yes' || String(value).toLowerCase() === 'checked';
