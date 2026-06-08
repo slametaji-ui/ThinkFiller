@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const previewList = document.getElementById('previewList');
   const injectDataBtn = document.getElementById('injectDataBtn');
   const regenerateDataBtn = document.getElementById('regenerateDataBtn');
+  const copyDataBtn = document.getElementById('copyDataBtn');
 
   // State variables
   let activeTabId = null;
@@ -210,6 +211,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     } finally {
       injectDataBtn.disabled = false;
       btnText.textContent = oldText;
+    }
+  });
+
+  // 8. Copy Data Button Click (Copy preview values to clipboard as JSON)
+  copyDataBtn.addEventListener('click', async () => {
+    try {
+      const finalData = {};
+      previewList.querySelectorAll('.preview-input').forEach(input => {
+        const id = input.getAttribute('data-id');
+        let val = input.value;
+        if (val === 'true') val = true;
+        if (val === 'false') val = false;
+        finalData[id] = val;
+      });
+
+      const jsonStr = JSON.stringify(finalData, null, 2);
+      await navigator.clipboard.writeText(jsonStr);
+      
+      const btnText = copyDataBtn.querySelector('.btn-text');
+      const oldText = btnText.textContent;
+      btnText.textContent = 'Copied! ✔';
+      setTimeout(() => {
+        btnText.textContent = oldText;
+      }, 1500);
+
+      logMessage('Copied generated form data to clipboard as JSON.', 'success');
+    } catch (err) {
+      logMessage(`Failed to copy to clipboard: ${err.message}`, 'error');
     }
   });
 

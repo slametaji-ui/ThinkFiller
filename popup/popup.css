@@ -628,7 +628,7 @@ select:focus {
 
 .preview-actions {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 2fr 1.2fr 0.8fr;
   gap: 8px;
 }
 
