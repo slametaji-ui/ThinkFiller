@@ -282,6 +282,14 @@
         continue;
       }
 
+      const tagName = element.tagName.toLowerCase();
+
+      // Skip disabled standard fields (excluding select/radio groups which are checked internally)
+      if (element.disabled && tagName !== 'select' && !thinkFillerId.startsWith('tf_radio_group_')) {
+        console.warn(`ThinkFiller AI: Skipping disabled field ${thinkFillerId}`);
+        continue;
+      }
+
       if (thinkFillerId.startsWith('tf_radio_group_')) {
         // Handle grouped radio buttons
         const radios = document.querySelectorAll(`input[type="radio"][data-thinkfiller-radio-group-id="${thinkFillerId}"]`);
@@ -299,7 +307,7 @@
             const isLabelPartial = labelText.toLowerCase().includes(String(value).toLowerCase());
             
             if (isValueMatch || isLabelMatch || isLabelPartial) {
-              if (!radio.checked) {
+              if (!radio.disabled && !radio.checked) {
                 radio.checked = true;
                 triggerEvents(radio, ['click', 'change']);
               }
@@ -309,7 +317,7 @@
 
           if (!matched) {
             if (typeof value === 'boolean' || value === 'true') {
-              if (radios[0] && !radios[0].checked) {
+              if (radios[0] && !radios[0].disabled && !radios[0].checked) {
                 radios[0].checked = true;
                 triggerEvents(radios[0], ['click', 'change']);
                 matched = true;
@@ -330,8 +338,6 @@
       } else {
         // Standard elements
         try {
-          const tagName = element.tagName.toLowerCase();
-          
           // If it is a select dropdown, check if it's disabled or empty, and wait/poll up to 2 seconds for it to update
           if (tagName === 'select') {
             const targetValStr = String(value).trim().toLowerCase();
@@ -352,6 +358,12 @@
                 break;
               }
               await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
+            // Skip if the select element is STILL disabled after the polling period
+            if (element.disabled) {
+              console.warn(`ThinkFiller AI: Skipping select field ${thinkFillerId} because it remained disabled.`);
+              continue;
             }
           }
 
